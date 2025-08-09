@@ -1,0 +1,15 @@
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.user
+*.DotSettings.user
+
+# .NET build outputs
+bin/
+obj/
+**/bin/
+**/obj/
+
+# logs
+*.log
