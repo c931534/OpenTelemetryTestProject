@@ -1,0 +1,45 @@
+# 接收端（收集從 service 傳來的資料）
+receivers:
+  otlp:  # 使用 OTLP 協議接收 trace 和 metric 資料
+    protocols:
+      grpc:  # 接收 gRPC 格式資料（通常用來收 trace）
+        endpoint: "0.0.0.0:4317"  # 開放 4317 端口
+      http:  # 接收 HTTP Protobuf 格式資料（通常用來收 metric）
+        endpoint: "0.0.0.0:4318"  # 開放 4318 端口
+
+# 處理器（處理接收到的資料，例如批次送出）
+processors:
+  batch:  # 批次處理器，可優化傳輸效能、降低資源使用
+
+# 輸出端（將資料輸出到對應後端服務）
+exporters:
+  otlp:  # 將 trace 資料透過 OTLP 傳送到 Jaeger
+    endpoint: "jaeger:4317"  # Jaeger container 的 OTLP 接收端
+    tls:
+      insecure: true  # 允許使用非 TLS 傳輸（本地開發用途）
+
+  prometheus:  # 將 metric 暴露給 Prometheus 抓取
+    endpoint: "0.0.0.0:9464"  # Prometheus 會來這裡抓 metrics
+    namespace: "etta"  # 給所有 metric 加上前綴，例如 demo_http_server_duration_seconds
+    const_labels:
+      label1: value1  # 給所有 metric 加上一個固定的 label，可用於 Grafana 分組
+
+  debug:  # 將所有資料印在 stdout，方便除錯用
+    verbosity: detailed
+
+# 服務組態（定義收送流程）
+service:
+  telemetry:
+    logs:
+      level: "debug"  # 設定 Collector 本身的 log 級別（debug、info、warn、error）
+
+  pipelines:
+    traces:
+      receivers: [otlp]       # 哪些接收器能收到 trace 資料
+      processors: [batch]     # 用哪個處理器來處理 trace
+      exporters: [otlp, debug]  # 最後把 trace 輸出到哪裡（Jaeger、console）
+
+    metrics:
+      receivers: [otlp]       # 哪些接收器能收到 metric 資料
+      processors: [batch]     # 用哪個處理器來處理 metric
+      exporters: [prometheus, debug]  # 輸出 metric 到 Prometheus 與 console
