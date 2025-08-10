@@ -39,7 +39,7 @@ builder.Services.AddOpenTelemetry()
             .AddHttpClientInstrumentation()
             .SetResourceBuilder(
                 ResourceBuilder.CreateDefault()
-                    .AddService("service-e"))
+                    .AddService("backend-admin-service"))
             .AddOtlpExporter(opt =>
             {
                 opt.Endpoint = new Uri("http://collector:4317");
@@ -51,7 +51,7 @@ builder.Services.AddOpenTelemetry()
         metrics
             .SetResourceBuilder(
                 ResourceBuilder.CreateDefault()
-                    .AddService("service-e")
+                    .AddService("backend-admin-service")
                     .AddAttributes(new Dictionary<string, object>
                     {
                         ["service.instance.id"] = Guid.NewGuid().ToString(),
@@ -70,20 +70,20 @@ builder.Services.AddOpenTelemetry()
 
 // 宣告自訂 metrics
 var meter = new Meter("ServiceE.CustomMetrics");
-var counter = meter.CreateCounter<int>("service_e_test_counter");
-var callBCounter = meter.CreateCounter<int>("service_e_call_b_requests");
+var counter = meter.CreateCounter<int>("backend_admin_test_counter");
+var callBCounter = meter.CreateCounter<int>("backend_promotion_management_requests_total");
 var app = builder.Build();
 
 // 使用 Controllers
 app.MapControllers();
 
 // ✅ 註冊路由
-app.MapGet("/", () => "Service E is running");
+app.MapGet("/", () => "Backend Admin Service E is running");
 
 app.MapGet("/api/test-metric", () =>
 {
     counter.Add(1, KeyValuePair.Create<string, object?>("label", "test"));
-    return Results.Ok("Metric incremented");
+    return Results.Ok("Backend Admin Metric incremented");
 });
 
 // ✅ 不要把這些寫在 `app.Run()` 之後

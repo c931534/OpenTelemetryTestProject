@@ -23,14 +23,28 @@ var meter = new Meter("ServiceB.CustomMetrics");
 var counter = meter.CreateCounter<int>("service_b_test_counter");
 var requestCounter = meter.CreateCounter<int>("service_b_requests_total");
 
-// 加入 OpenTelemetry：Metrics + Tracing
+// 初始化 OpenTelemetry Metrics
 builder.Services.AddOpenTelemetry()
+    .WithTracing(tracerProviderBuilder =>
+    {
+        tracerProviderBuilder
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .SetResourceBuilder(
+                ResourceBuilder.CreateDefault()
+                    .AddService("promotion-service"))
+            .AddOtlpExporter(opt =>
+            {
+                opt.Endpoint = new Uri("http://collector:4317");
+                opt.Protocol = OtlpExportProtocol.Grpc;
+            });
+    })
     .WithMetrics(metrics =>
     {
         metrics
             .SetResourceBuilder(
                 ResourceBuilder.CreateDefault()
-                    .AddService("service-b")
+                    .AddService("promotion-service")
                     .AddAttributes(new Dictionary<string, object>
                     {
                         ["service.instance.id"] = Guid.NewGuid().ToString(),
@@ -42,22 +56,8 @@ builder.Services.AddOpenTelemetry()
             .AddMeter("ServiceB.CustomMetrics")
             .AddOtlpExporter(opt =>
             {
-                opt.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
+                opt.Protocol = OtlpExportProtocol.HttpProtobuf;
                 opt.Endpoint = new Uri("http://collector:4318/v1/metrics");
-            });
-    })
-    .WithTracing(tracing =>
-    {
-        tracing
-            .SetResourceBuilder(
-                ResourceBuilder.CreateDefault()
-                    .AddService("service-b"))
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
-            .AddOtlpExporter(opt =>
-            {
-                opt.Protocol = OtlpExportProtocol.Grpc;
-                opt.Endpoint = new Uri("http://collector:4317");
             });
     });
 
@@ -67,7 +67,7 @@ var app = builder.Build();
 app.MapControllers();
 
 // 加一個 root 測試頁
-app.MapGet("/", () => "Service B is running");
+app.MapGet("/", () => "Promotion Service is running");
 
 // 添加測試 metrics 的端點
 app.MapGet("/api/test-metric", () =>

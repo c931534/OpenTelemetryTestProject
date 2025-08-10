@@ -6,22 +6,22 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 
 [ApiController]
-[Route("api")]
+[Route("api/admin")]
 public class HelloController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
 
     private static readonly Meter Meter = new("ServiceE.CustomMetrics");
-    private static readonly Counter<int> CallBErrorCounter = Meter.CreateCounter<int>("service_e_callb_error_count");
-    private static readonly Counter<int> CallCErrorCounter = Meter.CreateCounter<int>("service_e_callc_error_count");
-    private static readonly Counter<int> CallDErrorCounter = Meter.CreateCounter<int>("service_e_calld_error_count");
+    private static readonly Counter<int> CallBErrorCounter = Meter.CreateCounter<int>("backend_promotion_management_error_count");
+    private static readonly Counter<int> CallCErrorCounter = Meter.CreateCounter<int>("backend_payment_management_error_count");
+    private static readonly Counter<int> CallDErrorCounter = Meter.CreateCounter<int>("backend_thirdparty_management_error_count");
     
     public HelloController(IHttpClientFactory factory)
     {
         _httpClientFactory = factory;
     }
 
-    [HttpGet("call-b")]
+    [HttpGet("promotion-management")]
     public async Task<IActionResult> CallB()
     {
         try
@@ -35,18 +35,18 @@ public class HelloController : ControllerBase
             
             if (response.IsSuccessStatusCode)
             {
-                return Ok($"ServiceB said: {result}");
+                return Ok($"Promotion Management: {result}");
             }
             else
             {
                 CallBErrorCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "http"));
-                return StatusCode((int)response.StatusCode, $"ServiceB error: {result}");
+                return StatusCode((int)response.StatusCode, $"Promotion Management error: {result}");
             }
         }
         catch (HttpRequestException ex)
         {
             CallBErrorCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "http"));
-            return StatusCode(502, $"ServiceB unreachable: {ex.Message}");
+            return StatusCode(502, $"Promotion Management unreachable: {ex.Message}");
         }
         catch (System.Exception ex)
         {
@@ -55,7 +55,7 @@ public class HelloController : ControllerBase
         }
     }
 
-    [HttpGet("call-c")]
+    [HttpGet("payment-management")]
     public async Task<IActionResult> CallC()
     {
         try
@@ -69,18 +69,18 @@ public class HelloController : ControllerBase
             
             if (response.IsSuccessStatusCode)
             {
-                return Ok($"ServiceC said: {result}");
+                return Ok($"Payment Management: {result}");
             }
             else
             {
                 CallCErrorCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "http"));
-                return StatusCode((int)response.StatusCode, $"ServiceC error: {result}");
+                return StatusCode((int)response.StatusCode, $"Payment Management error: {result}");
             }
         }
         catch (HttpRequestException ex)
         {
             CallCErrorCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "http"));
-            return StatusCode(502, $"ServiceC unreachable: {ex.Message}");
+            return StatusCode(502, $"Payment Management unreachable: {ex.Message}");
         }
         catch (System.Exception ex)
         {
@@ -89,7 +89,7 @@ public class HelloController : ControllerBase
         }
     }
 
-    [HttpGet("call-d")]
+    [HttpGet("thirdparty-management")]
     public async Task<IActionResult> CallD()
     {
         try
@@ -103,18 +103,18 @@ public class HelloController : ControllerBase
             
             if (response.IsSuccessStatusCode)
             {
-                return Ok($"ServiceD said: {result}");
+                return Ok($"Third-party Management: {result}");
             }
             else
             {
                 CallDErrorCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "http"));
-                return StatusCode((int)response.StatusCode, $"ServiceD error: {result}");
+                return StatusCode((int)response.StatusCode, $"Third-party Management error: {result}");
             }
         }
         catch (HttpRequestException ex)
         {
             CallDErrorCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "http"));
-            return StatusCode(502, $"ServiceD unreachable: {ex.Message}");
+            return StatusCode(502, $"Third-party Management unreachable: {ex.Message}");
         }
         catch (System.Exception ex)
         {
@@ -123,12 +123,12 @@ public class HelloController : ControllerBase
         }
     }
 
-    [HttpGet("call-all")]
+    [HttpGet("all-management")]
     public async Task<IActionResult> CallAll()
     {
         var results = new List<string>();
         
-        // 調用 ServiceB
+        // 調用 Promotion Management
         try
         {
             var clientB = _httpClientFactory.CreateClient("ServiceB");
@@ -140,21 +140,21 @@ public class HelloController : ControllerBase
             
             if (responseB.IsSuccessStatusCode)
             {
-                results.Add($"ServiceB: {resultB}");
+                results.Add($"Promotion Management: {resultB}");
             }
             else
             {
                 CallBErrorCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "http"));
-                results.Add($"ServiceB: Error - {resultB}");
+                results.Add($"Promotion Management: Error - {resultB}");
             }
         }
         catch (HttpRequestException ex)
         {
             CallBErrorCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "http"));
-            results.Add($"ServiceB: Error - {ex.Message}");
+            results.Add($"Promotion Management: Error - {ex.Message}");
         }
         
-        // 調用 ServiceC
+        // 調用 Payment Management
         try
         {
             var clientC = _httpClientFactory.CreateClient("ServiceC");
@@ -166,21 +166,21 @@ public class HelloController : ControllerBase
             
             if (responseC.IsSuccessStatusCode)
             {
-                results.Add($"ServiceC: {resultC}");
+                results.Add($"Payment Management: {resultC}");
             }
             else
             {
                 CallCErrorCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "http"));
-                results.Add($"ServiceC: Error - {resultC}");
+                results.Add($"Payment Management: Error - {resultC}");
             }
         }
         catch (HttpRequestException ex)
         {
             CallCErrorCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "http"));
-            results.Add($"ServiceC: Error - {ex.Message}");
+            results.Add($"Payment Management: Error - {ex.Message}");
         }
         
-        // 調用 ServiceD
+        // 調用 Third-party Management
         try
         {
             var clientD = _httpClientFactory.CreateClient("ServiceD");
@@ -192,20 +192,20 @@ public class HelloController : ControllerBase
             
             if (responseD.IsSuccessStatusCode)
             {
-                results.Add($"ServiceD: {resultD}");
+                results.Add($"Third-party Management: {resultD}");
             }
             else
             {
                 CallDErrorCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "http"));
-                results.Add($"ServiceD: Error - {resultD}");
+                results.Add($"Third-party Management: Error - {resultD}");
             }
         }
         catch (HttpRequestException ex)
         {
             CallDErrorCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "http"));
-            results.Add($"ServiceD: Error - {ex.Message}");
+            results.Add($"Third-party Management: Error - {ex.Message}");
         }
         
-        return Ok(new { message = "All services called", results });
+        return Ok(new { message = "All management services called from Backend", results });
     }
 } 

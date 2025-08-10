@@ -2,35 +2,40 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics.Metrics;
 using System.Collections.Generic;
 using System;
+using System.Threading.Tasks;
 
 [ApiController]
 [Route("api")]
 public class HelloController : ControllerBase
 {
     private readonly Counter<int> _requestCounter;
-    private readonly Counter<int> _exceptionCounter;
+    private readonly Counter<int> _delayCounter;
 
     public HelloController()
     {
         var meter = new Meter("ServiceD.CustomMetrics");
-        _requestCounter = meter.CreateCounter<int>("service_d_hello_requests");
-        _exceptionCounter = meter.CreateCounter<int>("service_d_exception_count");
+        _requestCounter = meter.CreateCounter<int>("thirdparty_service_requests_total");
+        _delayCounter = meter.CreateCounter<int>("thirdparty_service_delay_count");
     }
 
     [HttpGet("hello")]
-    public IActionResult Hello()
+    public async Task<IActionResult> Hello()
     {
         _requestCounter.Add(1, KeyValuePair.Create<string, object?>("endpoint", "hello"));
         
-        // 檢查是否來自 service-e
+        // 檢查是否來自 service-e (後台管理)
         if (Request.Headers.ContainsKey("X-From") && Request.Headers["X-From"].ToString() == "service-e")
         {
-            _exceptionCounter.Add(1, KeyValuePair.Create<string, object?>("from", "service-e"));
-            _exceptionCounter.Add(1, KeyValuePair.Create<string, object?>("error_type", "intentional"));
+            var random = new Random();
+            var delaySeconds = random.Next(3, 6);
+            await Task.Delay(delaySeconds * 1000);
             
-            throw new InvalidOperationException("ServiceD intentionally throwing exception for service-e request");
+            _delayCounter.Add(1, KeyValuePair.Create<string, object?>("from", "backend_admin"));
+            _delayCounter.Add(1, KeyValuePair.Create<string, object?>("delay_seconds", delaySeconds));
+            
+            return Ok($"Hello from Third-party Service (delayed {delaySeconds}s for backend admin)");
         }
         
-        return Ok("Hello from ServiceD");
+        return Ok("Hello from Third-party Service");
     }
 } 

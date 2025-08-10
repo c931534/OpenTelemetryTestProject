@@ -14,8 +14,8 @@ public class HelloController : ControllerBase
     public HelloController()
     {
         var meter = new Meter("ServiceB.CustomMetrics");
-        _requestCounter = meter.CreateCounter<int>("service_b_hello_requests");
-        _delayCounter = meter.CreateCounter<int>("service_b_delay_count");
+        _requestCounter = meter.CreateCounter<int>("promotion_service_requests_total");
+        _delayCounter = meter.CreateCounter<int>("promotion_service_delay_count");
     }
 
     [HttpGet("hello")]
@@ -23,19 +23,19 @@ public class HelloController : ControllerBase
     {
         _requestCounter.Add(1, KeyValuePair.Create<string, object?>("endpoint", "hello"));
         
-        // 檢查是否來自 service-e
+        // 檢查是否來自 service-e (後台管理)
         if (Request.Headers.ContainsKey("X-From") && Request.Headers["X-From"].ToString() == "service-e")
         {
             var random = new Random();
             var delaySeconds = random.Next(3, 6);
             await Task.Delay(delaySeconds * 1000);
             
-            _delayCounter.Add(1, KeyValuePair.Create<string, object?>("from", "service-e"));
+            _delayCounter.Add(1, KeyValuePair.Create<string, object?>("from", "backend_admin"));
             _delayCounter.Add(1, KeyValuePair.Create<string, object?>("delay_seconds", delaySeconds));
             
-            return Ok($"Hello from ServiceB (delayed {delaySeconds}s for service-e)");
+            return Ok($"Hello from Promotion Service (delayed {delaySeconds}s for backend admin)");
         }
         
-        return Ok("Hello from ServiceB");
+        return Ok("Hello from Promotion Service");
     }
 }

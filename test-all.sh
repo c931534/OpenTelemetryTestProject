@@ -1,97 +1,57 @@
 #!/bin/bash
 
-echo "🔍 開始測試所有 API..."
+echo "🚀 開始測試所有服務..."
+
+# 前台服務測試 (Service A)
+echo "📱 測試前台服務 (Service A - 會員服務)"
+echo "  - 測試 Promotion 服務..."
+curl -s http://localhost:5001/api/member/promotion
 echo ""
-echo "📋 服務對應顏色："
-echo "🔴 紅色 = Service A (port 5001)"
-echo "🟠 橘色 = Service B (port 5002)"
-echo "🔵 藍色 = Service C (port 5003)"
-echo "🟣 紫色 = Service D (port 5004)"
-echo "🟢 綠色 = Service E (port 5005)"
+echo "  - 測試 Payment 服務..."
+curl -s http://localhost:5001/api/member/payment
+echo ""
+echo "  - 測試 Third-party 服務..."
+curl -s http://localhost:5001/api/member/thirdparty
+echo ""
+echo "  - 測試所有服務..."
+curl -s http://localhost:5001/api/member/all-services
 echo ""
 
-echo "🔴 GET http://localhost:5001/"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5001/
+echo ""
+
+# 後台服務測試 (Service E)
+echo "🖥️  測試後台服務 (Service E - 管理員服務)"
+echo "  - 測試 Promotion 管理..."
+curl -s http://localhost:5005/api/admin/promotion-management
+echo ""
+echo "  - 測試 Payment 管理..."
+curl -s http://localhost:5005/api/admin/payment-management
+echo ""
+echo "  - 測試 Third-party 管理..."
+curl -s http://localhost:5005/api/admin/thirdparty-management
+echo ""
+echo "  - 測試所有管理服務..."
+curl -s http://localhost:5005/api/admin/all-management
+echo ""
 
 echo ""
-echo "🔴 GET http://localhost:5001/api/test-metric"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5001/api/test-metric
+
+# 直接測試下層服務
+echo "🔧 直接測試下層服務"
+echo "  - 測試 Promotion 服務 (Service B)..."
+curl -s http://localhost:5002/api/hello
+echo ""
+echo "  - 測試 Payment 服務 (Service C)..."
+curl -s http://localhost:5003/api/hello
+echo ""
+echo "  - 測試 Third-party 服務 (Service D)..."
+curl -s http://localhost:5004/api/hello
+echo ""
 
 echo ""
-echo "🔴 GET http://localhost:5001/api/call-b"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5001/api/call-b
-
+echo "✅ 所有服務測試完成！"
 echo ""
-echo "🔴 GET http://localhost:5001/api/call-c"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5001/api/call-c
-
-echo ""
-echo "🔴 GET http://localhost:5001/api/call-d"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5001/api/call-d
-
-echo ""
-echo "🔴 GET http://localhost:5001/api/call-all"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5001/api/call-all
-
-echo ""
-echo "🟠 GET http://localhost:5002/"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5002/
-
-echo ""
-echo "🟠 GET http://localhost:5002/api/test-metric"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5002/api/test-metric
-
-echo ""
-echo "🟠 GET http://localhost:5002/api/hello"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5002/api/hello
-
-echo ""
-echo "🔵 GET http://localhost:5003/"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5003/
-
-echo ""
-echo "🔵 GET http://localhost:5003/api/test-metric"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5003/api/test-metric
-
-echo ""
-echo "🔵 GET http://localhost:5003/api/hello"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5003/api/hello
-
-echo ""
-echo "🟣 GET http://localhost:5004/"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5004/
-
-echo ""
-echo "🟣 GET http://localhost:5004/api/test-metric"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5004/api/test-metric
-
-echo ""
-echo "🟣 GET http://localhost:5004/api/hello"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5004/api/hello
-
-echo ""
-echo "🟢 GET http://localhost:5005/"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5005/
-
-echo ""
-echo "🟢 GET http://localhost:5005/api/test-metric"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5005/api/test-metric
-
-echo ""
-echo "🟢 GET http://localhost:5005/api/call-b"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5005/api/call-b
-
-echo ""
-echo "🟢 GET http://localhost:5005/api/call-c"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5005/api/call-c
-
-echo ""
-echo "🟢 GET http://localhost:5005/api/call-d"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5005/api/call-d
-
-echo ""
-echo "🟢 GET http://localhost:5005/api/call-all"
-curl -s -w "\n\n🔚 Response Code: %{http_code}\n" http://localhost:5005/api/call-all
-
-echo ""
-echo "✅ 所有 API 測試完成"
+echo "📊 現在可以查看監控數據："
+echo "  - Prometheus: http://localhost:9090"
+echo "  - Grafana: http://localhost:3000 (admin/admin)"
+echo "  - Jaeger: http://localhost:16686"
